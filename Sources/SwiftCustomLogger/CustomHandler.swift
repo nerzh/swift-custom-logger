@@ -33,7 +33,14 @@ public struct CustomHandler: LogHandler {
             ? self.prettyMetadata
             : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
 
-        let formattedMessage = self.formatter.processLog(level: level, message: message, prettyMetadata: prettyMetadata, file: file, function: function, line: line)
+        let formattedMessage = self.formatter.processLog(
+            level: level,
+            message: message,
+            prettyMetadata: prettyMetadata,
+            file: file,
+            function: function,
+            line: line
+        )
         self.printer.handle(formattedMessage)
     }
     

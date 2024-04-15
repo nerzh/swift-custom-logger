@@ -2,7 +2,7 @@ import Foundation
 import Logging
 
 public enum LogComponent {
-    case text(String)
+    case text((Logger.Level) -> String)
     case group([LogComponent])
     case timestamp
     case level
@@ -50,11 +50,20 @@ extension LogFormatter {
         line: UInt
     ) -> String {
         switch component {
-        case .text(let string):
-            return string
-        case .group(let logComponents):
+        case let .text(handler):
+            return handler(level)
+        case let .group(logComponents):
             return logComponents.map({ component in
-                self.processComponent(component, now: now, level: level, message: message, prettyMetadata: prettyMetadata, file: file, function: function, line: line)
+                self.processComponent(
+                    component,
+                    now: now,
+                    level: level,
+                    message: message,
+                    prettyMetadata: prettyMetadata,
+                    file: file,
+                    function: function,
+                    line: line
+                )
             }).joined()
         case .timestamp:
             return self.timestampFormatter.string(from: now)
