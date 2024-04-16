@@ -1,5 +1,5 @@
 ```swift
-public func setupLogger(level: Logger.Level? = nil) -> Logger {
+public func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logger {
     var level: Logger.Level! = level
     if level.isNil {
         #if DEBUG
@@ -9,27 +9,25 @@ public func setupLogger(level: Logger.Level? = nil) -> Logger {
         #endif
     }
     
-    var icon: String = ""
-    switch level {
-    case .trace: icon = "💾"
-    case .debug: icon = "🐞"
-    case .info: icon = "📟"
-    case .notice: icon = "❕"
-    case .warning: icon = "⚠️"
-    case .error: icon = "🛑"
-    case .critical: icon = "❌"
-    case .none:
-        break
-    }
-    var log = Logger(label: "Yor App Log:") { label in
+    var log = Logger(label: label) { label in
         return CustomHandler(
             formatter: BasicFormatter([
-                .text(icon),
-                .text(label),
+                .text({ level in
+                    switch level {
+                    case .trace: return "💾"
+                    case .debug: return "🐞"
+                    case .info: return "📟"
+                    case .notice: return "❕"
+                    case .warning: return "⚠️"
+                    case .error: return "🛑"
+                    case .critical: return "❌"
+                    }
+                }),
+                .text({ _ in label }),
                 .level,
                 .file,
                 .line,
-                .text(":\n"),
+                .text({ _ in ":\n" }),
                 .message
             ],
             separator: " "),
