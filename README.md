@@ -1,4 +1,6 @@
 ```swift
+import SwiftCustomLogger
+
 public func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logger {
     var level: Logger.Level! = level
     if level.isNil {
