@@ -1,9 +1,10 @@
 ```swift
 import SwiftCustomLogger
+import Logging
 
-public func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logger {
+func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logger {
     var level: Logger.Level! = level
-    if level.isNil {
+    if level == nil {
         #if DEBUG
         level = .debug
         #else
@@ -17,19 +18,19 @@ public func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logge
                 .text({ level in
                     switch level {
                     case .trace: return "💾"
-                    case .debug: return "🐞"
+                    case .debug: return "🛠️"
                     case .info: return "📟"
                     case .notice: return "❕"
                     case .warning: return "⚠️"
-                    case .error: return "🛑"
+                    case .error: return "🐞"
                     case .critical: return "❌"
                     }
                 }),
+                .text({ level in "[\(level)]".uppercased() }),
                 .text({ _ in label }),
-                .level,
                 .file,
                 .line,
-                .text({ _ in ":\n" }),
+                .text({ _ in ":" }),
                 .message
             ],
             separator: " "),
@@ -40,5 +41,4 @@ public func setupLogger(label: String = "", level: Logger.Level? = nil) -> Logge
     
     return log
 }
-
 ```
