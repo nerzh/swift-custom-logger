@@ -1,9 +1,23 @@
 import Foundation
 import Logging
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-import Darwin
-#else
+#if canImport(Darwin.C)
+import Darwin.C
+
+#elseif canImport(Android)
+import Android
+
+#elseif canImport(WASILibc)
+import WASILibc
+
+#elseif canImport(Glibc)
 import Glibc
+
+#elseif canImport(Musl)
+import Musl
+
+#elseif canImport(ucrt)
+import ucrt
+
 #endif
 
 public protocol Printer {
@@ -43,12 +57,30 @@ private struct OutputStream: TextOutputStream {
             _ = fputs(ptr, file)
         }
     }
-    
-    #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
+
+    #if canImport(Darwin.C)
     static let stderr = OutputStream(file: Darwin.stderr)
     static let stdout = OutputStream(file: Darwin.stdout)
-    #else
+
+    #elseif canImport(Android)
+    static let stderr = OutputStream(file: Android.stderr!)
+    static let stdout = OutputStream(file: Android.stdout!)
+
+    #elseif canImport(WASILibc)
+    static let stderr = OutputStream(file: WASILibc.stderr!)
+    static let stdout = OutputStream(file: WASILibc.stdout!)
+
+    #elseif canImport(Glibc)
     static let stderr = OutputStream(file: Glibc.stderr!)
     static let stdout = OutputStream(file: Glibc.stdout!)
+
+    #elseif canImport(Musl)
+    static let stderr = OutputStream(file: Musl.stderr!)
+    static let stdout = OutputStream(file: Musl.stdout!)
+
+    #elseif canImport(ucrt)
+    static let stderr = OutputStream(file: ucrt.stderr!)
+    static let stdout = OutputStream(file: ucrt.stdout!)
+
     #endif
 }
