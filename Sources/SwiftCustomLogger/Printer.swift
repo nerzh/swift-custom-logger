@@ -46,41 +46,28 @@ public struct LoggerPrinter: Printer {
     }
 }
 
-private struct OutputStream: TextOutputStream {
-    
-    public let file: UnsafeMutablePointer<FILE>
+private enum OutputStream: TextOutputStream {
+    case stderr, stdout
 
-    public func write(_ string: String) {
+    func write(_ string: String) {
+        #if canImport(Darwin.C)
+        let file = self == .stderr ? Darwin.stderr : Darwin.stdout
+        #elseif canImport(Android)
+        let file = self == .stderr ? Android.stderr : Android.stdout
+        #elseif canImport(WASILibc)
+        let file = self == .stderr ? WASILibc.stderr! : WASILibc.stdout!
+        #elseif canImport(Glibc)
+        let file = self == .stderr ? Glibc.stderr! : Glibc.stdout!
+        #elseif canImport(Musl)
+        let file = self == .stderr ? Musl.stderr! : Musl.stdout!
+        #elseif canImport(ucrt)
+        let file = self == .stderr ? ucrt.stderr! : ucrt.stdout!
+        #endif
+
         string.withCString { ptr in
             flockfile(file)
             defer { funlockfile(file) }
             _ = fputs(ptr, file)
         }
     }
-
-    #if canImport(Darwin.C)
-    static let stderr = OutputStream(file: Darwin.stderr)
-    static let stdout = OutputStream(file: Darwin.stdout)
-
-    #elseif canImport(Android)
-    static let stderr = OutputStream(file: Android.stderr!)
-    static let stdout = OutputStream(file: Android.stdout!)
-
-    #elseif canImport(WASILibc)
-    static let stderr = OutputStream(file: WASILibc.stderr!)
-    static let stdout = OutputStream(file: WASILibc.stdout!)
-
-    #elseif canImport(Glibc)
-    static let stderr = OutputStream(file: Glibc.stderr!)
-    static let stdout = OutputStream(file: Glibc.stdout!)
-
-    #elseif canImport(Musl)
-    static let stderr = OutputStream(file: Musl.stderr!)
-    static let stdout = OutputStream(file: Musl.stdout!)
-
-    #elseif canImport(ucrt)
-    static let stderr = OutputStream(file: ucrt.stderr!)
-    static let stdout = OutputStream(file: ucrt.stdout!)
-
-    #endif
 }
